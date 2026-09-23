@@ -295,7 +295,8 @@ compression  = naiveKbps / kbps`}</Pre>
           <Section id="recording" title="Recording format">
             <P>
               A <Code>Recording</Code> is a plain object — safe to postMessage, IndexedDB or JSON.
-              Frames are captured every 6 ticks in the simulator and every 8 in batch mode.
+              Frames are captured every 5 ticks in the simulator, every 6 in the replay demo
+              synthesiser, and every 8 in the batch dashboard.
             </P>
             <Pre>{`type Frame = {
   t: number;            // source tick
