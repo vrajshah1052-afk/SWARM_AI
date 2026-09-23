@@ -1,12 +1,12 @@
 import { GW, GH, RW, RH, type Frame, type SwarmEngine } from "./engine";
 
-export type ViewOpts = {
+export interface ViewOpts {
   showFood: boolean;
   showHome: boolean;
   showRobots: boolean;
   showResource: boolean;
   gain: number;
-};
+}
 
 export const DEFAULT_VIEW: ViewOpts = {
   showFood: true,
@@ -34,9 +34,10 @@ function paintFields(
   wallAt: ((i: number) => number) | null,
   resAt: ((i: number) => number) | null,
   o: ViewOpts,
-) {
+): HTMLCanvasElement | null {
   const c = getBuffer(w, h);
-  const ctx = c.getContext("2d")!;
+  const ctx = c.getContext("2d");
+  if (!ctx) return null;
   const img = ctx.createImageData(w, h);
   const d = img.data;
   for (let i = 0, p = 0; i < w * h; i++, p += 4) {
@@ -106,6 +107,7 @@ export function renderEngine(canvas: HTMLCanvasElement, engine: SwarmEngine, o: 
     (i) => engine.resource[i],
     o,
   );
+  if (!src) return;
   ctx.imageSmoothingEnabled = true;
   ctx.drawImage(src, 0, 0, cw, ch);
 
@@ -173,6 +175,7 @@ export function renderFrame(
     null,
     o,
   );
+  if (!src) return;
   ctx.imageSmoothingEnabled = true;
   ctx.drawImage(src, 0, 0, cw, ch);
 

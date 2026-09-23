@@ -12,11 +12,12 @@ import { renderIso } from "../sim/render";
 import { addRecording, newId } from "../sim/store";
 import { BarRow, Btn, Chip, LineChart, Panel, Slider, Stat, formatNum } from "../components/ui";
 import { cn } from "../utils/cn";
+import { downloadBlob } from "../utils/download";
 import { useNavigate } from "react-router-dom";
 
 const COLORS = ["#22d3ee", "#f59e0b", "#a78bfa", "#34d399", "#f472b6", "#60a5fa", "#fb923c"];
 
-type Task = {
+interface Task {
   id: string;
   name: string;
   params: Params;
@@ -33,7 +34,7 @@ type Task = {
     foodSites: { x: number; y: number; r: number }[];
     nest: { x: number; y: number };
   };
-};
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -41,6 +42,7 @@ export default function Dashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const busy = useRef(false);
   const rafRef = useRef(0);
+  const aliveRef = useRef(true);
   const [selected, setSelected] = useState<string | null>(null);
   const [draft, setDraft] = useState({
     robots: 300,
@@ -67,6 +69,7 @@ export default function Dashboard() {
     const frames: Frame[] = [];
     let done = 0;
     const chunk = () => {
+      if (!aliveRef.current) return;
       const N = 45;
       for (let i = 0; i < N && done < next.ticks; i++, done++) {
         engine.step();
@@ -125,6 +128,16 @@ export default function Dashboard() {
     enqueue("Bandwidth Frugal", PRESETS.frugal.patch, 1100);
   }, [enqueue]);
 
+  // Cancel any in-flight batch work when the page unmounts.
+  useEffect(() => {
+    aliveRef.current = true;
+    return () => {
+      aliveRef.current = false;
+      cancelAnimationFrame(rafRef.current);
+      busy.current = false;
+    };
+  }, []);
+
   const done = tasks.filter((t) => t.status === "done");
   const sel = tasks.find((t) => t.id === selected) ?? done[0];
   const runningTask = tasks.find((t) => t.status === "running");
@@ -149,7 +162,7 @@ export default function Dashboard() {
       nest: t.result.nest,
       history: t.result.history,
     });
-    navigate(`/replay?id=${rec.id}`);
+    void navigate(`/replay?id=${rec.id}`);
   };
 
   const exportCsv = () => {
@@ -172,10 +185,7 @@ export default function Dashboard() {
       ]),
     ];
     const blob = new Blob([rows.map((r) => r.join(",")).join("\n")], { type: "text/csv" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "swarm-batch-results.csv";
-    a.click();
+    downloadBlob("swarm-batch-results.csv", blob);
   };
 
   return (

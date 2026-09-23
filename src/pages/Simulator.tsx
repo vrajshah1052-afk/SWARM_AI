@@ -14,6 +14,7 @@ import { DEFAULT_VIEW, renderEngine, type ViewOpts } from "../sim/render";
 import { addRecording, newId } from "../sim/store";
 import { Btn, Chip, LineChart, Panel, Slider, Stat, Toggle, formatNum } from "../components/ui";
 import { cn } from "../utils/cn";
+import { downloadDataUrl, downloadJSON } from "../utils/download";
 
 type Brush = "none" | "food" | "wall" | "erase";
 
@@ -35,6 +36,7 @@ export default function Simulator() {
   const [recording, setRecording] = useState(false);
   const [recFrames, setRecFrames] = useState(0);
   const [preset, setPreset] = useState("balanced");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const runRef = useRef(running);
   const turboRef = useRef(turbo);
@@ -156,7 +158,7 @@ export default function Simulator() {
           nest: { ...engine.nest },
           history: [...engine.history],
         });
-        navigate(`/replay?id=${rec.id}`);
+        void navigate(`/replay?id=${rec.id}`);
       }
     } else {
       recRef.current = { on: true, frames: [] };
@@ -168,25 +170,32 @@ export default function Simulator() {
 
   const exportPng = () => {
     const c = canvasRef.current;
-    if (!c) return;
-    const a = document.createElement("a");
-    a.href = c.toDataURL("image/png");
-    a.download = `pheromone-field-t${engine.stats.tick}.png`;
-    a.click();
+    if (!c) {
+      setErrorMsg("Canvas is not ready — try again in a moment.");
+      return;
+    }
+    try {
+      const url = c.toDataURL("image/png");
+      const res = downloadDataUrl(`pheromone-field-t${engine.stats.tick}.png`, url);
+      if (!res.ok) setErrorMsg(`PNG export failed: ${res.error.message}`);
+    } catch (err) {
+      setErrorMsg(`PNG export failed: ${(err as Error).message}`);
+    }
   };
 
   const exportJson = () => {
-    const blob = new Blob(
-      [JSON.stringify({ params, stats: engine.stats, history: engine.history }, null, 2)],
-      { type: "application/json" },
-    );
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `swarm-run-t${engine.stats.tick}.json`;
-    a.click();
+    const res = downloadJSON(`swarm-run-t${engine.stats.tick}.json`, {
+      params,
+      stats: engine.stats,
+      history: engine.history,
+    });
+    if (!res.ok) setErrorMsg(`JSON export failed: ${res.error.message}`);
   };
 
-  const P = (k: keyof Params) => (v: number) => setParams((p) => ({ ...p, [k]: v }));
+  const P = useCallback(
+    (k: keyof Params) => (v: number) => setParams((p) => ({ ...p, [k]: v })),
+    [],
+  );
   const hist = history.slice(-70);
 
   return (
@@ -211,6 +220,22 @@ export default function Simulator() {
           <Chip color="cyan">tick {stats.tick.toLocaleString()}</Chip>
         </div>
       </div>
+
+      {errorMsg && (
+        <div
+          role="alert"
+          className="mb-4 flex items-start justify-between gap-3 rounded-lg border border-rose-500/30 bg-rose-500/[0.06] px-4 py-2.5 text-[12px] text-rose-200"
+        >
+          <span>{errorMsg}</span>
+          <button
+            onClick={() => setErrorMsg(null)}
+            aria-label="dismiss error"
+            className="text-rose-300 hover:text-rose-100"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       <div className="grid gap-4 xl:grid-cols-[290px_minmax(0,1fr)_300px]">
         {/* ---------- LEFT: parameters ---------- */}
@@ -395,6 +420,8 @@ export default function Simulator() {
             <div className="relative overflow-hidden rounded-lg border border-white/[0.09] bg-ink-950">
               <canvas
                 ref={canvasRef}
+                role="img"
+                aria-label={`Live pheromone-field simulation. ${stats.collected} units delivered, ${stats.carrying} agents currently carrying, ${(stats.coverage * 100).toFixed(1)}% map coverage.`}
                 className={cn("block w-full", brush !== "none" ? "cursor-crosshair" : "cursor-default")}
                 style={{ aspectRatio: `${GW} / ${GH}` }}
                 onMouseDown={paint}
@@ -413,7 +440,11 @@ export default function Simulator() {
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div
+              className="mt-3 flex flex-wrap items-center gap-2"
+              role="radiogroup"
+              aria-label="Painting brush"
+            >
               <span className="font-mono text-[10px] tracking-[0.16em] text-slate-500 uppercase">brush</span>
               {(
                 [
@@ -425,9 +456,13 @@ export default function Simulator() {
               ).map(([b, label]) => (
                 <button
                   key={b}
+                  type="button"
+                  role="radio"
+                  aria-checked={brush === b}
+                  aria-label={`Brush: ${label}`}
                   onClick={() => setBrush(b)}
                   className={cn(
-                    "rounded-md border px-2.5 py-1 text-[11px] transition",
+                    "rounded-md border px-2.5 py-1 text-[11px] transition focus-visible:ring-2 focus-visible:ring-cyan-400/60 focus-visible:outline-none",
                     brush === b
                       ? "border-cyan-400/40 bg-cyan-400/10 text-cyan-300"
                       : "border-white/10 text-slate-400 hover:bg-white/[0.05]",

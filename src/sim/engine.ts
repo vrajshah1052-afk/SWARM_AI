@@ -18,7 +18,7 @@
 export const GW = 200;
 export const GH = 126;
 
-export type Params = {
+export interface Params {
   robots: number;
   speed: number;
   evaporation: number;
@@ -32,7 +32,7 @@ export type Params = {
   quantBits: number;
   msgHz: number;
   obstacles: boolean;
-};
+}
 
 export const DEFAULT_PARAMS: Params = {
   robots: 260,
@@ -49,6 +49,46 @@ export const DEFAULT_PARAMS: Params = {
   msgHz: 6,
   obstacles: true,
 };
+
+/**
+ * Hard limits enforced by `clampParams`. UI sliders should stay inside these
+ * ranges, but we clamp here as a defence against corrupted state, imported
+ * JSON, or programmatic bugs.
+ */
+const PARAM_BOUNDS: Record<keyof Params, [number, number] | null> = {
+  robots: [1, 2000],
+  speed: [0.05, 5],
+  evaporation: [0.0001, 0.5],
+  diffusion: [0, 1],
+  deposit: [0.5, 200],
+  sensorAngle: [1, 179],
+  sensorDist: [1, 40],
+  turnRate: [0.01, 6.28],
+  wander: [0, 3],
+  foodClusters: [1, 32],
+  quantBits: [1, 16],
+  msgHz: [0.1, 200],
+  obstacles: null,
+};
+
+function clampField(key: keyof Params, value: unknown, fallback: number | boolean): unknown {
+  const bounds = PARAM_BOUNDS[key];
+  if (bounds === null) return value === true || value === "true";
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(bounds[1], Math.max(bounds[0], n));
+}
+
+/** Reject NaN / Infinity / out-of-range parameter updates. */
+export function clampParams(patch: Partial<Params>, base: Params = DEFAULT_PARAMS): Partial<Params> {
+  const out: Partial<Params> = {};
+  (Object.keys(patch) as (keyof Params)[]).forEach((key) => {
+    const value = patch[key];
+    if (value === undefined) return;
+    (out as Record<string, unknown>)[key] = clampField(key, value, base[key]);
+  });
+  return out;
+}
 
 export const PRESETS: Record<string, { label: string; blurb: string; patch: Partial<Params> }> = {
   balanced: {
@@ -78,16 +118,16 @@ export const PRESETS: Record<string, { label: string; blurb: string; patch: Part
   },
 };
 
-export type Robot = {
+export interface Robot {
   x: number;
   y: number;
   a: number;
   carrying: boolean;
   age: number;
   tripStart: number;
-};
+}
 
-export type Stats = {
+export interface Stats {
   tick: number;
   collected: number;
   trips: number;
@@ -100,18 +140,18 @@ export type Stats = {
   carrying: number;
   foodRemaining: number;
   efficiency: number;
-};
+}
 
-export type HistoryPoint = {
+export interface HistoryPoint {
   t: number;
   collected: number;
   bandwidth: number;
   trailMass: number;
   coverage: number;
   carrying: number;
-};
+}
 
-export type Frame = {
+export interface Frame {
   t: number;
   /** quantised robot state: x,y in 0..255 and carry flag */
   rx: Uint8Array;
@@ -121,12 +161,12 @@ export type Frame = {
   food: Uint8Array;
   home: Uint8Array;
   stats: Stats;
-};
+}
 
 export const RW = 100;
 export const RH = 63;
 
-export type Recording = {
+export interface Recording {
   id: string;
   name: string;
   createdAt: number;
@@ -135,7 +175,7 @@ export type Recording = {
   foodSites: { x: number; y: number; r: number }[];
   nest: { x: number; y: number };
   history: HistoryPoint[];
-};
+}
 
 function mulberry32(seed: number) {
   let a = seed >>> 0;
@@ -167,7 +207,7 @@ export class SwarmEngine {
   private totalFood = 1;
 
   constructor(params: Partial<Params> = {}, seed = 1337) {
-    this.params = { ...DEFAULT_PARAMS, ...params };
+    this.params = { ...DEFAULT_PARAMS, ...clampParams(params) };
     this.rand = mulberry32(seed);
     const n = GW * GH;
     this.food = new Float32Array(n);
@@ -195,7 +235,7 @@ export class SwarmEngine {
 
   setParams(p: Partial<Params>) {
     const prevRobots = this.params.robots;
-    this.params = { ...this.params, ...p };
+    this.params = { ...this.params, ...clampParams(p, this.params) };
     if (this.params.robots !== prevRobots) this.syncRobots();
   }
 
@@ -352,7 +392,7 @@ export class SwarmEngine {
         const dx = this.nest.x - r.x;
         const dy = this.nest.y - r.y;
         const want = Math.atan2(dy, dx);
-        let diff = ((want - r.a + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+        const diff = ((want - r.a + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
         r.a += diff * 0.09;
       }
 

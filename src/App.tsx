@@ -1,5 +1,6 @@
-import { HashRouter, Route, Routes, Navigate } from "react-router-dom";
+import { HashRouter, Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import Home from "./pages/Home";
 import Simulator from "./pages/Simulator";
 import Dashboard from "./pages/Dashboard";
@@ -11,11 +12,46 @@ export default function App() {
     <HashRouter>
       <Layout>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/simulator" element={<Simulator />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/replay" element={<Replay />} />
-          <Route path="/docs" element={<Docs />} />
+          <Route
+            path="/"
+            element={
+              <ErrorBoundary>
+                <Home />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/simulator"
+            element={
+              <ErrorBoundary>
+                <Simulator />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <ErrorBoundary>
+                <Dashboard />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/replay"
+            element={
+              <ErrorBoundary>
+                <Replay />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/docs"
+            element={
+              <ErrorBoundary>
+                <Docs />
+              </ErrorBoundary>
+            }
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

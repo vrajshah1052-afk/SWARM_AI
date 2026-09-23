@@ -5,6 +5,7 @@ import { DEFAULT_VIEW, renderFrame, type ViewOpts } from "../sim/render";
 import { addRecording, newId, removeRecording, useRecordings } from "../sim/store";
 import { Btn, Chip, LineChart, Panel, Slider, Stat, Toggle, formatNum } from "../components/ui";
 import { cn } from "../utils/cn";
+import { downloadJSON } from "../utils/download";
 
 const DEMOS: { name: string; patch: Partial<Params>; ticks: number }[] = [
   { name: "Demo · Balanced Forage", patch: PRESETS.balanced.patch, ticks: 1600 },
@@ -18,12 +19,17 @@ function generate(
   patch: Partial<Params>,
   ticks: number,
   onProgress: (p: number) => void,
-): Promise<Recording> {
+  aliveRef: React.MutableRefObject<boolean>,
+): Promise<Recording | null> {
   return new Promise((resolve) => {
     const engine = new SwarmEngine(patch, 900 + Math.floor(Math.random() * 500));
     const frames: Frame[] = [];
     let t = 0;
     const chunk = () => {
+      if (!aliveRef.current) {
+        resolve(null);
+        return;
+      }
       for (let i = 0; i < 50 && t < ticks; i++, t++) {
         engine.step();
         if (t % 6 === 0) frames.push(engine.snapshot());
@@ -57,6 +63,7 @@ export default function Replay() {
   const [view, setView] = useState<ViewOpts>({ ...DEFAULT_VIEW, showResource: false });
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const bootRef = useRef(false);
+  const genAliveRef = useRef(true);
 
   const selectedId = sp.get("id");
   const rec = recordings.find((r) => r.id === selectedId) ?? recordings[0];
@@ -69,17 +76,28 @@ export default function Replay() {
 
   const makeDemos = useCallback(async () => {
     for (const d of DEMOS) {
+      if (!genAliveRef.current) break;
       setGenProgress({ name: d.name, p: 0 });
-      const r = await generate(d.name, d.patch, d.ticks, (p) => setGenProgress({ name: d.name, p }));
-      addRecording(r);
+      const r = await generate(
+        d.name,
+        d.patch,
+        d.ticks,
+        (p) => setGenProgress({ name: d.name, p }),
+        genAliveRef,
+      );
+      if (r) addRecording(r);
     }
     setGenProgress(null);
   }, []);
 
   useEffect(() => {
+    genAliveRef.current = true;
     if (bootRef.current) return;
     bootRef.current = true;
     if (recordings.length === 0) void makeDemos();
+    return () => {
+      genAliveRef.current = false;
+    };
   }, [recordings.length, makeDemos]);
 
   // playback loop
@@ -99,7 +117,7 @@ export default function Replay() {
       const dt = t - last;
       last = t;
       const s = stateRef.current;
-      if (!s.rec || !s.rec.frames.length) return;
+      if (!s.rec?.frames.length) return;
       if (s.playing && !document.hidden) {
         acc += dt * s.rate;
         const frameMs = 1000 / 30;
@@ -132,27 +150,14 @@ export default function Replay() {
 
   const exportRec = () => {
     if (!rec) return;
-    const blob = new Blob(
-      [
-        JSON.stringify(
-          {
-            name: rec.name,
-            createdAt: rec.createdAt,
-            params: rec.params,
-            frames: rec.frames.length,
-            history: rec.history,
-            finalStats: rec.frames[rec.frames.length - 1]?.stats,
-          },
-          null,
-          2,
-        ),
-      ],
-      { type: "application/json" },
-    );
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `${rec.name.replace(/\W+/g, "-").toLowerCase()}.json`;
-    a.click();
+    downloadJSON(`${rec.name.replace(/\W+/g, "-").toLowerCase()}.json`, {
+      name: rec.name,
+      createdAt: rec.createdAt,
+      params: rec.params,
+      frames: rec.frames.length,
+      history: rec.history,
+      finalStats: rec.frames[rec.frames.length - 1]?.stats,
+    });
   };
 
   return (
@@ -244,7 +249,17 @@ export default function Replay() {
         <div className="space-y-4">
           <Panel dense>
             <div className="relative overflow-hidden rounded-lg border border-white/[0.09] bg-ink-950">
-              <canvas ref={canvasRef} className="block w-full" style={{ aspectRatio: "200 / 126" }} />
+              <canvas
+                ref={canvasRef}
+                role="img"
+                aria-label={
+                  rec
+                    ? `Playback of ${rec.name}, frame ${idx + 1} of ${rec.frames.length}.`
+                    : "No recording loaded."
+                }
+                className="block w-full"
+                style={{ aspectRatio: "200 / 126" }}
+              />
               {!rec && (
                 <div className="absolute inset-0 flex items-center justify-center text-[12px] text-slate-600">
                   {genProgress ? "rendering timeline…" : "no recording loaded"}
@@ -301,6 +316,7 @@ export default function Replay() {
             <input
               type="range"
               className="mt-3 w-full"
+              aria-label="Playback timeline"
               min={0}
               max={Math.max(0, (rec?.frames.length ?? 1) - 1)}
               value={idx}
