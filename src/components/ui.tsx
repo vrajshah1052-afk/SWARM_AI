@@ -98,6 +98,11 @@ export function Slider({
         max={max}
         step={step}
         value={value}
+        aria-label={label}
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={value}
+        aria-valuetext={`${fmt ? fmt(value) : value}${unit ?? ""}`}
         onChange={(e) => onChange(parseFloat(e.target.value))}
       />
       {hint && <div className="mt-1 text-[10px] leading-snug text-slate-600">{hint}</div>}
@@ -125,11 +130,15 @@ export function Toggle({
   return (
     <button
       type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
       onClick={() => onChange(!checked)}
-      className="flex w-full items-center justify-between gap-3 rounded-md px-1.5 py-1 text-[11px] text-slate-300 transition hover:bg-white/[0.04]"
+      className="flex w-full items-center justify-between gap-3 rounded-md px-1.5 py-1 text-[11px] text-slate-300 transition hover:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-cyan-400/60 focus-visible:outline-none"
     >
       <span>{label}</span>
       <span
+        aria-hidden="true"
         className={cn(
           "relative h-4 w-8 rounded-full transition",
           checked ? on[color] : "bg-slate-700",
@@ -153,6 +162,7 @@ export function Btn({
   className,
   disabled,
   size = "md",
+  ariaLabel,
 }: {
   children: ReactNode;
   onClick?: () => void;
@@ -160,6 +170,7 @@ export function Btn({
   className?: string;
   disabled?: boolean;
   size?: "sm" | "md";
+  ariaLabel?: string;
 }) {
   const variants: Record<string, string> = {
     primary:
@@ -173,8 +184,9 @@ export function Btn({
       type="button"
       disabled={disabled}
       onClick={onClick}
+      aria-label={ariaLabel}
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-md transition disabled:cursor-not-allowed disabled:opacity-40",
+        "inline-flex items-center justify-center gap-1.5 rounded-md transition disabled:cursor-not-allowed disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-cyan-400/60 focus-visible:outline-none",
         size === "sm" ? "px-2.5 py-1 text-[11px]" : "px-3.5 py-1.5 text-xs",
         variants[variant],
         className,
@@ -205,7 +217,7 @@ export function Chip({ children, color = "slate" }: { children: ReactNode; color
   );
 }
 
-export type Series = { name: string; color: string; data: number[] };
+export interface Series { name: string; color: string; data: number[] }
 
 export function LineChart({
   series,
