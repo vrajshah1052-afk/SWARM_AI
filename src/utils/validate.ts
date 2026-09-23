@@ -42,20 +42,19 @@ export function sanitizeParams(input: unknown): Params {
     throw new ValidationError("Expected an object with a 'params' shape.");
   }
   const src = input as Record<string, unknown>;
-  const out: Params = { ...DEFAULT_PARAMS };
+  const out = { ...DEFAULT_PARAMS } as unknown as Record<string, number | boolean>;
   (Object.keys(PARAM_LIMITS) as (keyof Params)[]).forEach((key) => {
     const limit = PARAM_LIMITS[key];
     const raw = src[key];
     if (raw === undefined) return;
     if (limit === null) {
-      // boolean fields
-      (out as Record<string, unknown>)[key] = raw === true || raw === "true";
+      out[key] = raw === true || raw === "true";
     } else {
       const fallback = DEFAULT_PARAMS[key] as number;
-      (out as Record<string, unknown>)[key] = clampNumber(raw, limit[0], limit[1], fallback);
+      out[key] = clampNumber(raw, limit[0], limit[1], fallback);
     }
   });
-  return out;
+  return out as unknown as Params;
 }
 
 /**
