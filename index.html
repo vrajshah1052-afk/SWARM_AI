@@ -3,6 +3,19 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!--
+      This app is bundled as a single self-contained HTML file (see
+      vite-plugin-singlefile). All scripts and styles are inlined, so we can
+      use a very tight CSP: only inline resources, only same-origin data URIs
+      for downloads. No remote endpoints. No frames. No workers loaded from
+      URLs.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none';"
+    />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="color-scheme" content="dark" />
     <meta
       name="description"
       content="Digital Pheromone Swarm Intelligence — real-time stigmergic multi-robot simulation, bandwidth-aware trail compression, multi-task dashboards and replay analytics."
@@ -11,6 +24,12 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <p style="color: #e6ebf5; font-family: sans-serif; padding: 2rem">
+        This lab needs JavaScript enabled. The whole simulation runs in your
+        browser — no data leaves your machine.
+      </p>
+    </noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
