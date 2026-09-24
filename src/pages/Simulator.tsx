@@ -15,6 +15,7 @@ import { addRecording, newId } from "../sim/store";
 import { Btn, Chip, LineChart, Panel, Slider, Stat, Toggle, formatNum } from "../components/ui";
 import { cn } from "../utils/cn";
 import { downloadDataUrl, downloadJSON } from "../utils/download";
+import { synth } from "../utils/audio";
 
 type Brush = "none" | "food" | "wall" | "erase";
 
@@ -37,6 +38,12 @@ export default function Simulator() {
   const [recFrames, setRecFrames] = useState(0);
   const [preset, setPreset] = useState("balanced");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [muted, setMuted] = useState(true);
+  const soundState = useRef({
+    lastCollected: 0,
+    lastCarrying: 0,
+    lastPickupTick: 0,
+  });
 
   const runRef = useRef(running);
   const turboRef = useRef(turbo);
@@ -73,6 +80,21 @@ export default function Simulator() {
             setRecording(false);
           }
         }
+        // Aural feedback: nest returns → boom; food pickups → chime;
+        // active carrying → throttled ping via synth's internal rate limit.
+        const s = soundState.current;
+        const returns = engine.stats.collected - s.lastCollected;
+        const carryDelta = engine.stats.carrying - s.lastCarrying;
+        if (returns > 0) synth.play("boom");
+        // Pickups produce a positive carryDelta but at most a few per burst;
+        // throttle to one chime per ~15 ticks to avoid a wall of sound.
+        if (carryDelta > 0 && engine.stats.tick - s.lastPickupTick > 15) {
+          synth.play("chime");
+          s.lastPickupTick = engine.stats.tick;
+        }
+        if (engine.stats.carrying > 0) synth.play("ping");
+        s.lastCollected = engine.stats.collected;
+        s.lastCarrying = engine.stats.carrying;
       }
       renderEngine(canvas, engine, viewRef.current);
       frames++;
@@ -218,6 +240,25 @@ export default function Simulator() {
           <Chip color={running ? "emerald" : "amber"}>{running ? "▶ running" : "❚❚ paused"}</Chip>
           <Chip color="slate">{fps} fps</Chip>
           <Chip color="cyan">tick {stats.tick.toLocaleString()}</Chip>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={!muted}
+            aria-label={muted ? "Enable sound" : "Mute sound"}
+            onClick={() => {
+              const next = !muted;
+              setMuted(next);
+              synth.setMuted(next);
+            }}
+            className={cn(
+              "rounded-full border px-2.5 py-1 font-mono text-[10px] tracking-wider uppercase transition focus-visible:ring-2 focus-visible:ring-cyan-400/60 focus-visible:outline-none",
+              muted
+                ? "border-white/10 text-slate-500 hover:text-slate-200"
+                : "border-cyan-400/40 bg-cyan-400/[0.08] text-cyan-300",
+            )}
+          >
+            {muted ? "🔇 sound off" : "🔊 sound on"}
+          </button>
         </div>
       </div>
 
