@@ -80,7 +80,10 @@ function clampField(key: keyof Params, value: unknown, fallback: number | boolea
 }
 
 /** Reject NaN / Infinity / out-of-range parameter updates. */
-export function clampParams(patch: Partial<Params>, base: Params = DEFAULT_PARAMS): Partial<Params> {
+export function clampParams(
+  patch: Partial<Params>,
+  base: Params = DEFAULT_PARAMS,
+): Partial<Params> {
   const out: Partial<Params> = {};
   (Object.keys(patch) as (keyof Params)[]).forEach((key) => {
     const value = patch[key];
@@ -258,7 +261,15 @@ export class SwarmEngine {
     this.distanceSum = 0;
     this.history = [];
     this.robots = [];
-    this.stats = { ...this.stats, tick: 0, collected: 0, trips: 0, avgTrip: 0, coverage: 0, efficiency: 0 };
+    this.stats = {
+      ...this.stats,
+      tick: 0,
+      collected: 0,
+      trips: 0,
+      avgTrip: 0,
+      coverage: 0,
+      efficiency: 0,
+    };
     this.spawnObstacles();
     this.spawnFood();
     this.syncRobots();
@@ -531,7 +542,9 @@ export class SwarmEngine {
     this.stats.foodRemaining = res / this.totalFood;
     this.stats.avgTrip = this.stats.trips ? this.tripSum / this.stats.trips : 0;
     this.stats.efficiency =
-      this.stats.tick > 0 ? (this.stats.collected / this.stats.tick) * (60 / Math.max(1, this.robots.length)) * 100 : 0;
+      this.stats.tick > 0
+        ? (this.stats.collected / this.stats.tick) * (60 / Math.max(1, this.robots.length)) * 100
+        : 0;
   }
 
   /** Compact snapshot for the replay system. */

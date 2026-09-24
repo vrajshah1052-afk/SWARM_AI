@@ -327,9 +327,7 @@ export function renderIso(canvas: HTMLCanvasElement, frame: Frame, rotate: numbe
       const top = sy - h;
       const w = cs * 0.9;
       const col =
-        vf >= vh
-          ? `rgba(34,211,238,${0.25 + v * 0.7})`
-          : `rgba(245,158,11,${0.22 + v * 0.7})`;
+        vf >= vh ? `rgba(34,211,238,${0.25 + v * 0.7})` : `rgba(245,158,11,${0.22 + v * 0.7})`;
       ctx.fillStyle = col;
       ctx.fillRect(sx - w / 2, top, w, h + 1.5);
       ctx.fillStyle = vf >= vh ? "rgba(190,250,255,0.9)" : "rgba(255,224,160,0.9)";

@@ -51,8 +51,15 @@ export function Stat({
   };
   return (
     <div className="rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2.5">
-      <div className="font-mono text-[10px] tracking-[0.14em] text-slate-500 uppercase">{label}</div>
-      <div className={cn("mt-1 font-mono text-xl leading-none font-semibold tabular-nums", colors[accent])}>
+      <div className="font-mono text-[10px] tracking-[0.14em] text-slate-500 uppercase">
+        {label}
+      </div>
+      <div
+        className={cn(
+          "mt-1 font-mono text-xl leading-none font-semibold tabular-nums",
+          colors[accent],
+        )}
+      >
         {value}
         {unit && <span className="ml-1 text-[11px] font-normal text-slate-500">{unit}</span>}
       </div>
@@ -217,7 +224,11 @@ export function Chip({ children, color = "slate" }: { children: ReactNode; color
   );
 }
 
-export interface Series { name: string; color: string; data: number[] }
+export interface Series {
+  name: string;
+  color: string;
+  data: number[];
+}
 
 export function LineChart({
   series,
@@ -259,7 +270,9 @@ export function LineChart({
         ))}
         {series.map((s) => {
           if (s.data.length < 2) return null;
-          const d = s.data.map((v, i) => `${i === 0 ? "M" : "L"}${px(i).toFixed(1)},${py(v).toFixed(1)}`).join(" ");
+          const d = s.data
+            .map((v, i) => `${i === 0 ? "M" : "L"}${px(i).toFixed(1)},${py(v).toFixed(1)}`)
+            .join(" ");
           const area = `${d} L${px(s.data.length - 1)},${H - pad.b} L${px(0)},${H - pad.b} Z`;
           return (
             <g key={s.name}>
@@ -271,7 +284,10 @@ export function LineChart({
       </svg>
       <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
         {series.map((s) => (
-          <span key={s.name} className="flex items-center gap-1.5 font-mono text-[10px] text-slate-400">
+          <span
+            key={s.name}
+            className="flex items-center gap-1.5 font-mono text-[10px] text-slate-400"
+          >
             <i className="h-1.5 w-4 rounded-full" style={{ background: s.color }} />
             {s.name}
             {yUnit ? ` (${yUnit})` : ""}

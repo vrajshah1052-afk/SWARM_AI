@@ -167,7 +167,21 @@ export default function Dashboard() {
 
   const exportCsv = () => {
     const rows = [
-      ["task", "robots", "evaporation", "deposit", "bits", "hz", "ticks", "delivered", "trips", "avg_trip", "coverage", "kbps", "compression"],
+      [
+        "task",
+        "robots",
+        "evaporation",
+        "deposit",
+        "bits",
+        "hz",
+        "ticks",
+        "delivered",
+        "trips",
+        "avg_trip",
+        "coverage",
+        "kbps",
+        "compression",
+      ],
       ...done.map((t) => [
         t.name,
         t.params.robots,
@@ -219,7 +233,14 @@ export default function Dashboard() {
         <div className="space-y-4">
           <Panel title="New task">
             <div className="space-y-4">
-              <Slider label="Robots" value={draft.robots} min={40} max={900} step={10} onChange={(v) => setDraft({ ...draft, robots: v })} />
+              <Slider
+                label="Robots"
+                value={draft.robots}
+                min={40}
+                max={900}
+                step={10}
+                onChange={(v) => setDraft({ ...draft, robots: v })}
+              />
               <Slider
                 label="Evaporation λ"
                 value={draft.evaporation}
@@ -229,7 +250,13 @@ export default function Dashboard() {
                 onChange={(v) => setDraft({ ...draft, evaporation: v })}
                 fmt={(v) => v.toFixed(3)}
               />
-              <Slider label="Deposit δ" value={draft.deposit} min={5} max={80} onChange={(v) => setDraft({ ...draft, deposit: v })} />
+              <Slider
+                label="Deposit δ"
+                value={draft.deposit}
+                min={5}
+                max={80}
+                onChange={(v) => setDraft({ ...draft, deposit: v })}
+              />
               <Slider
                 label="Wander w"
                 value={draft.wander}
@@ -239,9 +266,31 @@ export default function Dashboard() {
                 onChange={(v) => setDraft({ ...draft, wander: v })}
                 fmt={(v) => v.toFixed(2)}
               />
-              <Slider label="Quantisation" value={draft.quantBits} min={1} max={8} onChange={(v) => setDraft({ ...draft, quantBits: v })} unit=" bits" />
-              <Slider label="Broadcast" value={draft.msgHz} min={1} max={20} onChange={(v) => setDraft({ ...draft, msgHz: v })} unit=" Hz" />
-              <Slider label="Duration" value={draft.ticks} min={300} max={3000} step={100} onChange={(v) => setDraft({ ...draft, ticks: v })} unit=" ticks" />
+              <Slider
+                label="Quantisation"
+                value={draft.quantBits}
+                min={1}
+                max={8}
+                onChange={(v) => setDraft({ ...draft, quantBits: v })}
+                unit=" bits"
+              />
+              <Slider
+                label="Broadcast"
+                value={draft.msgHz}
+                min={1}
+                max={20}
+                onChange={(v) => setDraft({ ...draft, msgHz: v })}
+                unit=" Hz"
+              />
+              <Slider
+                label="Duration"
+                value={draft.ticks}
+                min={300}
+                max={3000}
+                step={100}
+                onChange={(v) => setDraft({ ...draft, ticks: v })}
+                unit=" ticks"
+              />
               <Btn
                 variant="primary"
                 className="w-full"
@@ -269,7 +318,9 @@ export default function Dashboard() {
             <div className="grid gap-1.5">
               <Btn
                 onClick={() => {
-                  [80, 240, 480, 800].forEach((r) => enqueue(`Fleet size ${r}`, { robots: r }, 900));
+                  [80, 240, 480, 800].forEach((r) =>
+                    enqueue(`Fleet size ${r}`, { robots: r }, 900),
+                  );
                 }}
               >
                 Sweep fleet size (4 runs)
@@ -306,7 +357,9 @@ export default function Dashboard() {
           <Panel title={`Queue · ${tasks.length}`} dense>
             <div className="max-h-[420px] space-y-1.5 overflow-y-auto pr-1">
               {tasks.length === 0 && (
-                <p className="px-2 py-6 text-center text-[11.5px] text-slate-600">No tasks queued.</p>
+                <p className="px-2 py-6 text-center text-[11.5px] text-slate-600">
+                  No tasks queued.
+                </p>
               )}
               {tasks.map((t) => (
                 <button
@@ -321,7 +374,9 @@ export default function Dashboard() {
                 >
                   <div className="flex items-center gap-2">
                     <i className="h-2 w-2 shrink-0 rounded-full" style={{ background: t.color }} />
-                    <span className="flex-1 truncate text-[12px] font-medium text-slate-200">{t.name}</span>
+                    <span className="flex-1 truncate text-[12px] font-medium text-slate-200">
+                      {t.name}
+                    </span>
                     <span
                       className={cn(
                         "font-mono text-[9.5px] tracking-wider uppercase",
@@ -352,8 +407,7 @@ export default function Dashboard() {
                   </div>
                   <div className="mt-1 font-mono text-[9.5px] text-slate-500">
                     {t.params.robots} bots · λ{t.params.evaporation} · {t.params.quantBits}b ·{" "}
-                    {t.ticks}t
-                    {t.result ? ` · ${t.result.stats.collected} delivered` : ""}
+                    {t.ticks}t{t.result ? ` · ${t.result.stats.collected} delivered` : ""}
                   </div>
                 </button>
               ))}
@@ -389,14 +443,17 @@ export default function Dashboard() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-[1.15fr_1fr]">
-            <Panel title="Pseudo-3D pheromone relief" right={
-              <button
-                onClick={() => setAutoRotate((a) => !a)}
-                className="font-mono text-[10px] tracking-wider text-slate-400 uppercase hover:text-cyan-300"
-              >
-                {autoRotate ? "◼ stop spin" : "▶ spin"}
-              </button>
-            }>
+            <Panel
+              title="Pseudo-3D pheromone relief"
+              right={
+                <button
+                  onClick={() => setAutoRotate((a) => !a)}
+                  className="font-mono text-[10px] tracking-wider text-slate-400 uppercase hover:text-cyan-300"
+                >
+                  {autoRotate ? "◼ stop spin" : "▶ spin"}
+                </button>
+              }
+            >
               {sel?.result ? (
                 <IsoView frame={sel.result.frame} autoRotate={autoRotate} />
               ) : (
@@ -418,13 +475,36 @@ export default function Dashboard() {
                 <>
                   <div className="grid grid-cols-2 gap-2">
                     <Stat label="delivered" value={sel.result.stats.collected} accent="cyan" />
-                    <Stat label="avg trip" value={formatNum(sel.result.stats.avgTrip)} unit="t" accent="violet" />
-                    <Stat label="coverage" value={(sel.result.stats.coverage * 100).toFixed(1)} unit="%" accent="emerald" />
-                    <Stat label="uplink" value={sel.result.stats.bandwidthKbps.toFixed(1)} unit="kbps" accent="amber" />
-                    <Stat label="compression" value={sel.result.stats.compression.toFixed(1)} unit="×" accent="emerald" />
+                    <Stat
+                      label="avg trip"
+                      value={formatNum(sel.result.stats.avgTrip)}
+                      unit="t"
+                      accent="violet"
+                    />
+                    <Stat
+                      label="coverage"
+                      value={(sel.result.stats.coverage * 100).toFixed(1)}
+                      unit="%"
+                      accent="emerald"
+                    />
+                    <Stat
+                      label="uplink"
+                      value={sel.result.stats.bandwidthKbps.toFixed(1)}
+                      unit="kbps"
+                      accent="amber"
+                    />
+                    <Stat
+                      label="compression"
+                      value={sel.result.stats.compression.toFixed(1)}
+                      unit="×"
+                      accent="emerald"
+                    />
                     <Stat
                       label="units / bot / 1k ticks"
-                      value={((sel.result.stats.collected / sel.params.robots / sel.ticks) * 1000).toFixed(2)}
+                      value={(
+                        (sel.result.stats.collected / sel.params.robots / sel.ticks) *
+                        1000
+                      ).toFixed(2)}
                       accent="slate"
                     />
                   </div>
@@ -441,7 +521,8 @@ export default function Dashboard() {
                   </div>
                   <div className="mt-3 rounded-lg border border-white/[0.07] bg-ink-950/60 p-3 font-mono text-[10.5px] leading-relaxed text-slate-400">
                     <div className="text-slate-500">// configuration</div>
-                    robots={sel.params.robots} λ={sel.params.evaporation} D={sel.params.diffusion} δ=
+                    robots={sel.params.robots} λ={sel.params.evaporation} D={sel.params.diffusion}{" "}
+                    δ=
                     {sel.params.deposit} σ={sel.params.sensorAngle}° w={sel.params.wander} bits=
                     {sel.params.quantBits} hz={sel.params.msgHz}
                   </div>
@@ -496,13 +577,23 @@ export default function Dashboard() {
               <table className="w-full min-w-[760px] text-left">
                 <thead>
                   <tr className="font-mono text-[9.5px] tracking-[0.14em] text-slate-500 uppercase">
-                    {["task", "bots", "λ", "δ", "bits", "delivered", "trips", "avg trip", "coverage", "kbps", "ratio"].map(
-                      (h) => (
-                        <th key={h} className="border-b border-white/[0.07] px-2 py-2 font-medium">
-                          {h}
-                        </th>
-                      ),
-                    )}
+                    {[
+                      "task",
+                      "bots",
+                      "λ",
+                      "δ",
+                      "bits",
+                      "delivered",
+                      "trips",
+                      "avg trip",
+                      "coverage",
+                      "kbps",
+                      "ratio",
+                    ].map((h) => (
+                      <th key={h} className="border-b border-white/[0.07] px-2 py-2 font-medium">
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody className="font-mono text-[11px] text-slate-300">
@@ -516,18 +607,29 @@ export default function Dashboard() {
                       )}
                     >
                       <td className="border-b border-white/[0.04] px-2 py-2">
-                        <span className="mr-2 inline-block h-2 w-2 rounded-full align-middle" style={{ background: t.color }} />
+                        <span
+                          className="mr-2 inline-block h-2 w-2 rounded-full align-middle"
+                          style={{ background: t.color }}
+                        />
                         <span className="text-slate-200">{t.name}</span>
                       </td>
                       <td className="border-b border-white/[0.04] px-2 py-2">{t.params.robots}</td>
-                      <td className="border-b border-white/[0.04] px-2 py-2">{t.params.evaporation}</td>
+                      <td className="border-b border-white/[0.04] px-2 py-2">
+                        {t.params.evaporation}
+                      </td>
                       <td className="border-b border-white/[0.04] px-2 py-2">{t.params.deposit}</td>
-                      <td className="border-b border-white/[0.04] px-2 py-2">{t.params.quantBits}</td>
+                      <td className="border-b border-white/[0.04] px-2 py-2">
+                        {t.params.quantBits}
+                      </td>
                       <td className="border-b border-white/[0.04] px-2 py-2 text-cyan-300">
                         {t.result!.stats.collected}
                       </td>
-                      <td className="border-b border-white/[0.04] px-2 py-2">{t.result!.stats.trips}</td>
-                      <td className="border-b border-white/[0.04] px-2 py-2">{t.result!.stats.avgTrip.toFixed(0)}</td>
+                      <td className="border-b border-white/[0.04] px-2 py-2">
+                        {t.result!.stats.trips}
+                      </td>
+                      <td className="border-b border-white/[0.04] px-2 py-2">
+                        {t.result!.stats.avgTrip.toFixed(0)}
+                      </td>
                       <td className="border-b border-white/[0.04] px-2 py-2 text-emerald-300">
                         {(t.result!.stats.coverage * 100).toFixed(1)}%
                       </td>
@@ -584,10 +686,29 @@ function IsoView({ frame, autoRotate }: { frame: Frame; autoRotate: boolean }) {
 
   return (
     <div>
-      <canvas ref={ref} className="block h-[260px] w-full rounded-lg border border-white/[0.07] bg-ink-950" />
+      <canvas
+        ref={ref}
+        className="block h-[260px] w-full rounded-lg border border-white/[0.07] bg-ink-950"
+      />
       <div className="mt-3 grid grid-cols-2 gap-4">
-        <Slider label="Rotation" value={rot % (Math.PI * 2)} min={0} max={6.28} step={0.01} onChange={setRot} fmt={(v) => v.toFixed(2)} unit=" rad" />
-        <Slider label="Relief height" value={height} min={10} max={130} onChange={setHeight} unit="px" />
+        <Slider
+          label="Rotation"
+          value={rot % (Math.PI * 2)}
+          min={0}
+          max={6.28}
+          step={0.01}
+          onChange={setRot}
+          fmt={(v) => v.toFixed(2)}
+          unit=" rad"
+        />
+        <Slider
+          label="Relief height"
+          value={height}
+          min={10}
+          max={130}
+          onChange={setHeight}
+          unit="px"
+        />
       </div>
     </div>
   );

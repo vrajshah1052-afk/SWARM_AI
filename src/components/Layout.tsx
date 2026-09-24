@@ -97,7 +97,13 @@ export default function Layout({ children }: { children: ReactNode }) {
               onClick={() => setOpen((o) => !o)}
               aria-label="menu"
             >
-              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                viewBox="0 0 24 24"
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <path d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
@@ -134,8 +140,8 @@ export default function Layout({ children }: { children: ReactNode }) {
           <div>
             <Logo />
             <p className="mt-3 max-w-xs text-[12px] leading-relaxed text-slate-500">
-              An open research sandbox for stigmergic coordination: pheromone fields, bandwidth-aware
-              trail compression, and emergent multi-robot foraging.
+              An open research sandbox for stigmergic coordination: pheromone fields,
+              bandwidth-aware trail compression, and emergent multi-robot foraging.
             </p>
           </div>
           <FooterCol
@@ -157,7 +163,9 @@ export default function Layout({ children }: { children: ReactNode }) {
             ]}
           />
           <div>
-            <h4 className="font-mono text-[10px] tracking-[0.2em] text-slate-400 uppercase">Telemetry</h4>
+            <h4 className="font-mono text-[10px] tracking-[0.2em] text-slate-400 uppercase">
+              Telemetry
+            </h4>
             <div className="mt-3 space-y-1.5 font-mono text-[11px] text-slate-500">
               <div className="flex justify-between">
                 <span>lattice</span>
@@ -180,7 +188,8 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.06] px-6 py-4 font-mono text-[10px] tracking-wider text-slate-600">
           <span>
-            © {new Date().getFullYear()} DIGITAL PHEROMONE LAB · SIMULATED DATA, NO ROBOTS WERE HARMED
+            © {new Date().getFullYear()} DIGITAL PHEROMONE LAB · SIMULATED DATA, NO ROBOTS WERE
+            HARMED
           </span>
           <button
             type="button"

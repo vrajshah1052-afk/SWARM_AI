@@ -77,12 +77,36 @@ const STEPS = [
 ];
 
 const SCENARIOS = [
-  { icon: "🛰️", t: "Planetary Regolith Survey", d: "Comms-denied exploration where a shared field beats a shared map." },
-  { icon: "🌊", t: "Underwater Mine Sweeps", d: "Acoustic links measured in bytes/second, not megabits." },
-  { icon: "🚁", t: "Post-Disaster Search", d: "Hundreds of micro-UAVs converging on survivor signals." },
-  { icon: "🏭", t: "Warehouse Fleet Routing", d: "Congestion-aware lanes that reroute themselves as load shifts." },
-  { icon: "🌾", t: "Precision Agriculture", d: "Persistent coverage maps grown by the fleet, not the cloud." },
-  { icon: "🔬", t: "Research & Teaching", d: "A reproducible sandbox with seeded RNG and exportable traces." },
+  {
+    icon: "🛰️",
+    t: "Planetary Regolith Survey",
+    d: "Comms-denied exploration where a shared field beats a shared map.",
+  },
+  {
+    icon: "🌊",
+    t: "Underwater Mine Sweeps",
+    d: "Acoustic links measured in bytes/second, not megabits.",
+  },
+  {
+    icon: "🚁",
+    t: "Post-Disaster Search",
+    d: "Hundreds of micro-UAVs converging on survivor signals.",
+  },
+  {
+    icon: "🏭",
+    t: "Warehouse Fleet Routing",
+    d: "Congestion-aware lanes that reroute themselves as load shifts.",
+  },
+  {
+    icon: "🌾",
+    t: "Precision Agriculture",
+    d: "Persistent coverage maps grown by the fleet, not the cloud.",
+  },
+  {
+    icon: "🔬",
+    t: "Research & Teaching",
+    d: "A reproducible sandbox with seeded RNG and exportable traces.",
+  },
 ];
 
 export default function Home() {
@@ -143,11 +167,19 @@ export default function Home() {
               { k: "units delivered", v: live.collected.toLocaleString(), c: "text-cyan-300" },
               { k: "carrying now", v: live.carrying.toString(), c: "text-emerald-300" },
               { k: "radio load", v: live.kbps.toFixed(1) + " kbps", c: "text-amber-300" },
-              { k: "map coverage", v: (live.coverage * 100).toFixed(1) + "%", c: "text-violet-300" },
+              {
+                k: "map coverage",
+                v: (live.coverage * 100).toFixed(1) + "%",
+                c: "text-violet-300",
+              },
             ].map((s) => (
               <div key={s.k} className="bg-ink-950/80 px-4 py-3.5 backdrop-blur">
-                <div className="font-mono text-[10px] tracking-[0.16em] text-slate-500 uppercase">{s.k}</div>
-                <div className={`mt-1 font-mono text-lg font-semibold tabular-nums ${s.c}`}>{s.v}</div>
+                <div className="font-mono text-[10px] tracking-[0.16em] text-slate-500 uppercase">
+                  {s.k}
+                </div>
+                <div className={`mt-1 font-mono text-lg font-semibold tabular-nums ${s.c}`}>
+                  {s.v}
+                </div>
               </div>
             ))}
           </div>
@@ -158,7 +190,10 @@ export default function Home() {
       <div className="overflow-hidden border-b border-white/[0.07] bg-ink-900/50 py-2.5">
         <div className="flex w-max animate-marquee gap-8 whitespace-nowrap">
           {[...MARQUEE, ...MARQUEE].map((m, i) => (
-            <span key={i} className="font-mono text-[11px] tracking-[0.2em] text-slate-600 uppercase">
+            <span
+              key={i}
+              className="font-mono text-[11px] tracking-[0.2em] text-slate-600 uppercase"
+            >
               {m} <span className="text-cyan-500/40">◦</span>
             </span>
           ))}
@@ -179,10 +214,14 @@ export default function Home() {
               to={f.to}
               className={`group glass relative flex flex-col overflow-hidden rounded-xl p-5 transition duration-300 hover:-translate-y-1 ${f.ring}`}
             >
-              <div className={`absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${f.accent} opacity-0 transition group-hover:opacity-100`} />
+              <div
+                className={`absolute inset-x-0 top-0 h-24 bg-gradient-to-b ${f.accent} opacity-0 transition group-hover:opacity-100`}
+              />
               <div className="relative text-3xl">{f.icon}</div>
               <h3 className="relative mt-4 text-base font-semibold text-white">{f.title}</h3>
-              <p className="relative mt-2 flex-1 text-[12.5px] leading-relaxed text-slate-400">{f.body}</p>
+              <p className="relative mt-2 flex-1 text-[12.5px] leading-relaxed text-slate-400">
+                {f.body}
+              </p>
               <span className="relative mt-5 inline-flex items-center gap-1.5 font-mono text-[11px] tracking-wider text-cyan-300 uppercase">
                 {f.cta}
                 <span className="transition-transform group-hover:translate-x-1">→</span>
@@ -206,7 +245,9 @@ export default function Home() {
               <div className="mt-8 space-y-5">
                 {STEPS.map((s) => (
                   <div key={s.n} className="flex gap-4">
-                    <div className={`font-mono text-xl font-semibold ${s.color} tabular-nums`}>{s.n}</div>
+                    <div className={`font-mono text-xl font-semibold ${s.color} tabular-nums`}>
+                      {s.n}
+                    </div>
                     <div>
                       <h4 className="text-sm font-semibold text-white">{s.t}</h4>
                       <p className="mt-1 text-[12.5px] leading-relaxed text-slate-400">{s.d}</p>
@@ -221,7 +262,7 @@ export default function Home() {
                 field update · per tick
               </div>
               <pre className="mt-4 overflow-x-auto rounded-lg border border-white/[0.07] bg-ink-950/80 p-4 font-mono text-[11.5px] leading-relaxed text-slate-300">
-{`Φ(x, t+1) = (1 − λ)·Φ(x, t)
+                {`Φ(x, t+1) = (1 − λ)·Φ(x, t)
             + D·[ ∇²Φ(x, t) ]
             + Σᵢ  δᵢ · e^(−ageᵢ / τ)
 
@@ -236,9 +277,14 @@ steer     = argmax_{a ∈ {−σ, 0, +σ}} sense(a)
                   ["σ", "sensor angle", "text-violet-300"],
                   ["τ", "trace half-life", "text-emerald-300"],
                 ].map(([sym, name, c]) => (
-                  <div key={sym} className="rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2">
+                  <div
+                    key={sym}
+                    className="rounded-lg border border-white/[0.07] bg-white/[0.02] px-3 py-2"
+                  >
                     <div className={`font-mono text-lg ${c}`}>{sym}</div>
-                    <div className="font-mono text-[10px] tracking-wider text-slate-500 uppercase">{name}</div>
+                    <div className="font-mono text-[10px] tracking-wider text-slate-500 uppercase">
+                      {name}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -258,16 +304,34 @@ steer     = argmax_{a ∈ {−σ, 0, +σ}} sense(a)
               <Chip color="emerald">17.9× smaller</Chip>
             </div>
             <div className="mt-6 space-y-3.5">
-              <BarRow label="raw float32 map" value={1440} max={1440} color="#f43f5e" display="1440 kbps" />
-              <BarRow label="int16 patches" value={720} max={1440} color="#f59e0b" display="720 kbps" />
+              <BarRow
+                label="raw float32 map"
+                value={1440}
+                max={1440}
+                color="#f43f5e"
+                display="1440 kbps"
+              />
+              <BarRow
+                label="int16 patches"
+                value={720}
+                max={1440}
+                color="#f59e0b"
+                display="720 kbps"
+              />
               <BarRow label="4-bit + RLE" value={98} max={1440} color="#22d3ee" display="98 kbps" />
-              <BarRow label="2-bit @ 2 Hz" value={26} max={1440} color="#34d399" display="26 kbps" />
+              <BarRow
+                label="2-bit @ 2 Hz"
+                value={26}
+                max={1440}
+                color="#34d399"
+                display="26 kbps"
+              />
             </div>
             <p className="mt-6 text-[12.5px] leading-relaxed text-slate-400">
               Pheromone fields are extraordinarily compressible: they are smooth, sparse and
-              self-correcting. A lost packet is not a lost plan — the field simply re-converges on the
-              next deposit. That tolerance is what lets us quantise aggressively down to two bits
-              per cell.
+              self-correcting. A lost packet is not a lost plan — the field simply re-converges on
+              the next deposit. That tolerance is what lets us quantise aggressively down to two
+              bits per cell.
             </p>
           </div>
           <div>
@@ -279,10 +343,22 @@ steer     = argmax_{a ∈ {−σ, 0, +σ}} sense(a)
             />
             <div className="mt-7 grid gap-3 sm:grid-cols-2">
               {[
-                ["Δ-patch encoding", "Only cells that changed beyond the quantisation step are transmitted."],
-                ["Loss tolerant", "No ACKs, no retries. The field is a CRDT-like eventually-consistent surface."],
-                ["Bit-budget aware", "Pick 2–8 bits per cell and watch convergence quality trade off live."],
-                ["Gossip scaling", "Cost grows linearly with fleet size, not quadratically with pairs."],
+                [
+                  "Δ-patch encoding",
+                  "Only cells that changed beyond the quantisation step are transmitted.",
+                ],
+                [
+                  "Loss tolerant",
+                  "No ACKs, no retries. The field is a CRDT-like eventually-consistent surface.",
+                ],
+                [
+                  "Bit-budget aware",
+                  "Pick 2–8 bits per cell and watch convergence quality trade off live.",
+                ],
+                [
+                  "Gossip scaling",
+                  "Cost grows linearly with fleet size, not quadratically with pairs.",
+                ],
               ].map(([t, d]) => (
                 <div key={t} className="rounded-xl border border-white/[0.07] bg-white/[0.02] p-4">
                   <h4 className="text-[13px] font-semibold text-white">{t}</h4>
@@ -305,7 +381,9 @@ steer     = argmax_{a ∈ {−σ, 0, +σ}} sense(a)
           ].map(([v, k]) => (
             <div key={k} className="text-center">
               <div className="font-mono text-3xl font-semibold text-white sm:text-4xl">{v}</div>
-              <div className="mt-1.5 font-mono text-[10px] tracking-[0.18em] text-slate-500 uppercase">{k}</div>
+              <div className="mt-1.5 font-mono text-[10px] tracking-[0.18em] text-slate-500 uppercase">
+                {k}
+              </div>
             </div>
           ))}
         </div>
@@ -376,7 +454,9 @@ function SectionHead({
 }) {
   return (
     <div className={left ? "max-w-xl" : "mx-auto max-w-2xl text-center"}>
-      <div className="font-mono text-[10px] tracking-[0.24em] text-cyan-400/80 uppercase">{eyebrow}</div>
+      <div className="font-mono text-[10px] tracking-[0.24em] text-cyan-400/80 uppercase">
+        {eyebrow}
+      </div>
       <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white sm:text-3xl">{title}</h2>
       {sub && <p className="mt-3 text-[13.5px] leading-relaxed text-slate-400">{sub}</p>}
     </div>

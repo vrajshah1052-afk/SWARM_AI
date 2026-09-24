@@ -336,7 +336,12 @@ export default function Simulator() {
                       : "border-white/[0.07] hover:border-white/20 hover:bg-white/[0.04]",
                   )}
                 >
-                  <div className={cn("text-[12px] font-semibold", preset === k ? "text-cyan-300" : "text-slate-200")}>
+                  <div
+                    className={cn(
+                      "text-[12px] font-semibold",
+                      preset === k ? "text-cyan-300" : "text-slate-200",
+                    )}
+                  >
                     {p.label}
                   </div>
                   <div className="mt-0.5 text-[10.5px] leading-snug text-slate-500">{p.blurb}</div>
@@ -347,7 +352,14 @@ export default function Simulator() {
 
           <Panel title="Colony">
             <div className="space-y-4">
-              <Slider label="Robots" value={params.robots} min={20} max={900} step={10} onChange={P("robots")} />
+              <Slider
+                label="Robots"
+                value={params.robots}
+                min={20}
+                max={900}
+                step={10}
+                onChange={P("robots")}
+              />
               <Slider
                 label="Speed"
                 value={params.speed}
@@ -407,8 +419,22 @@ export default function Simulator() {
 
           <Panel title="Agent policy">
             <div className="space-y-4">
-              <Slider label="Sensor angle σ" value={params.sensorAngle} min={8} max={80} onChange={P("sensorAngle")} unit="°" />
-              <Slider label="Sensor distance" value={params.sensorDist} min={2} max={16} onChange={P("sensorDist")} unit=" cells" />
+              <Slider
+                label="Sensor angle σ"
+                value={params.sensorAngle}
+                min={8}
+                max={80}
+                onChange={P("sensorAngle")}
+                unit="°"
+              />
+              <Slider
+                label="Sensor distance"
+                value={params.sensorDist}
+                min={2}
+                max={16}
+                onChange={P("sensorDist")}
+                unit=" cells"
+              />
               <Slider
                 label="Turn rate"
                 value={params.turnRate}
@@ -442,7 +468,14 @@ export default function Simulator() {
                 onChange={P("quantBits")}
                 unit=" bits/cell"
               />
-              <Slider label="Broadcast rate" value={params.msgHz} min={1} max={20} onChange={P("msgHz")} unit=" Hz" />
+              <Slider
+                label="Broadcast rate"
+                value={params.msgHz}
+                min={1}
+                max={20}
+                onChange={P("msgHz")}
+                unit=" Hz"
+              />
               <div className="rounded-lg border border-white/[0.07] bg-white/[0.02] p-3">
                 <div className="flex justify-between font-mono text-[11px]">
                   <span className="text-slate-500">uplink</span>
@@ -484,7 +517,9 @@ export default function Simulator() {
                     onClick={() => setTurbo(s)}
                     className={cn(
                       "rounded px-2 py-1 font-mono text-[11px] transition",
-                      turbo === s ? "bg-cyan-400/20 text-cyan-300" : "text-slate-500 hover:text-slate-200",
+                      turbo === s
+                        ? "bg-cyan-400/20 text-cyan-300"
+                        : "text-slate-500 hover:text-slate-200",
                     )}
                   >
                     {s}×
@@ -508,7 +543,10 @@ export default function Simulator() {
                 ref={canvasRef}
                 role="img"
                 aria-label={`Live pheromone-field simulation. ${stats.collected} units delivered, ${stats.carrying} agents currently carrying, ${(stats.coverage * 100).toFixed(1)}% map coverage.`}
-                className={cn("block w-full", brush !== "none" ? "cursor-crosshair" : "cursor-default")}
+                className={cn(
+                  "block w-full",
+                  brush !== "none" ? "cursor-crosshair" : "cursor-default",
+                )}
                 style={{
                   aspectRatio: `${GW} / ${GH}`,
                   touchAction: brush === "none" ? "auto" : "none",
@@ -537,7 +575,9 @@ export default function Simulator() {
               role="radiogroup"
               aria-label="Painting brush"
             >
-              <span className="font-mono text-[10px] tracking-[0.16em] text-slate-500 uppercase">brush</span>
+              <span className="font-mono text-[10px] tracking-[0.16em] text-slate-500 uppercase">
+                brush
+              </span>
               {(
                 [
                   ["none", "Off", "slate"],
@@ -598,14 +638,26 @@ export default function Simulator() {
               <Stat label="delivered" value={stats.collected} accent="cyan" />
               <Stat label="round trips" value={stats.trips} accent="slate" />
               <Stat label="avg trip" value={formatNum(stats.avgTrip)} unit="t" accent="violet" />
-              <Stat label="coverage" value={(stats.coverage * 100).toFixed(1)} unit="%" accent="emerald" />
+              <Stat
+                label="coverage"
+                value={(stats.coverage * 100).toFixed(1)}
+                unit="%"
+                accent="emerald"
+              />
               <Stat label="trail mass" value={formatNum(stats.trailMass)} accent="amber" />
-              <Stat label="uplink" value={stats.bandwidthKbps.toFixed(1)} unit="kbps" accent="cyan" />
+              <Stat
+                label="uplink"
+                value={stats.bandwidthKbps.toFixed(1)}
+                unit="kbps"
+                accent="cyan"
+              />
             </div>
             <div className="mt-3 rounded-lg border border-white/[0.07] bg-white/[0.02] p-3">
               <div className="mb-1.5 flex justify-between font-mono text-[10px] tracking-wider text-slate-500 uppercase">
                 <span>resource depletion</span>
-                <span className="text-amber-300">{((1 - stats.foodRemaining) * 100).toFixed(1)}%</span>
+                <span className="text-amber-300">
+                  {((1 - stats.foodRemaining) * 100).toFixed(1)}%
+                </span>
               </div>
               <div className="h-2 overflow-hidden rounded-full bg-white/[0.06]">
                 <div
@@ -618,7 +670,11 @@ export default function Simulator() {
 
           <Panel title="Field layers">
             <div className="space-y-1">
-              <Toggle label="Φ_food heatmap" checked={view.showFood} onChange={(v) => setView({ ...view, showFood: v })} />
+              <Toggle
+                label="Φ_food heatmap"
+                checked={view.showFood}
+                onChange={(v) => setView({ ...view, showFood: v })}
+              />
               <Toggle
                 label="Φ_home heatmap"
                 checked={view.showHome}
@@ -655,12 +711,12 @@ export default function Simulator() {
           <Panel title="Interpretation">
             <ul className="space-y-2.5 text-[11.5px] leading-relaxed text-slate-400">
               <li>
-                <span className="text-cyan-300">Cyan arteries</span> mean the colony has locked onto a
-                resource. Their thickness ≈ traffic density.
+                <span className="text-cyan-300">Cyan arteries</span> mean the colony has locked onto
+                a resource. Their thickness ≈ traffic density.
               </li>
               <li>
-                <span className="text-amber-300">Amber haze</span> is the return gradient. If it fills
-                the arena, evaporation is too low and agents are getting lost in stale data.
+                <span className="text-amber-300">Amber haze</span> is the return gradient. If it
+                fills the arena, evaporation is too low and agents are getting lost in stale data.
               </li>
               <li>
                 Raise <span className="text-white">wander</span> when the swarm over-commits to one
@@ -693,7 +749,10 @@ export default function Simulator() {
 function LegendPill({ color, label }: { color: string; label: string }) {
   return (
     <span className="flex items-center gap-1.5 rounded-md border border-white/10 bg-ink-950/70 px-2 py-1 font-mono text-[9.5px] tracking-wider text-slate-300 uppercase backdrop-blur">
-      <i className="h-1.5 w-1.5 rounded-full" style={{ background: color, boxShadow: `0 0 8px ${color}` }} />
+      <i
+        className="h-1.5 w-1.5 rounded-full"
+        style={{ background: color, boxShadow: `0 0 8px ${color}` }}
+      />
       {label}
     </span>
   );

@@ -66,16 +66,12 @@ export function parseImportedRun(text: string): { params: Params } {
   try {
     json = JSON.parse(text);
   } catch (err) {
-    throw new ValidationError(
-      `File is not valid JSON: ${(err as Error).message}`,
-    );
+    throw new ValidationError(`File is not valid JSON: ${(err as Error).message}`);
   }
   if (!json || typeof json !== "object") {
     throw new ValidationError("Import must be a JSON object.");
   }
   const candidate =
-    "params" in (json as Record<string, unknown>)
-      ? (json as { params: unknown }).params
-      : json;
+    "params" in (json as Record<string, unknown>) ? (json as { params: unknown }).params : json;
   return { params: sanitizeParams(candidate) };
 }

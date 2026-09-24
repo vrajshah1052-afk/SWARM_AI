@@ -35,31 +35,28 @@ export default function Compare() {
   const runRef = useRef(running);
   runRef.current = running;
 
-  const boot = useCallback(
-    (rs: number, fc: number, s: number) => {
-      const patch: Partial<Params> = { ...DEFAULT_PARAMS, robots: rs, foodClusters: fc };
-      const swarm = new SwarmEngine(patch, s);
-      const base = new BaselineEngine(
-        {
-          robots: rs,
-          speed: DEFAULT_PARAMS.speed,
-          msgHz: DEFAULT_PARAMS.msgHz,
-          quantBits: DEFAULT_PARAMS.quantBits,
-        },
-        swarm.nest,
-        swarm.foodSites,
-        swarm.wall,
-        s,
-      );
-      swarmEngineRef.current = swarm;
-      baseEngineRef.current = base;
-      setHistory([]);
-      setSwarmTTF(null);
-      setBaseTTF(null);
-      setTick(0);
-    },
-    [],
-  );
+  const boot = useCallback((rs: number, fc: number, s: number) => {
+    const patch: Partial<Params> = { ...DEFAULT_PARAMS, robots: rs, foodClusters: fc };
+    const swarm = new SwarmEngine(patch, s);
+    const base = new BaselineEngine(
+      {
+        robots: rs,
+        speed: DEFAULT_PARAMS.speed,
+        msgHz: DEFAULT_PARAMS.msgHz,
+        quantBits: DEFAULT_PARAMS.quantBits,
+      },
+      swarm.nest,
+      swarm.foodSites,
+      swarm.wall,
+      s,
+    );
+    swarmEngineRef.current = swarm;
+    baseEngineRef.current = base;
+    setHistory([]);
+    setSwarmTTF(null);
+    setBaseTTF(null);
+    setTick(0);
+  }, []);
 
   useEffect(() => {
     boot(robots, foodClusters, seed);
@@ -121,7 +118,11 @@ export default function Compare() {
   const swarmKbps = swarm?.stats.bandwidthKbps ?? 0;
   const baseKbps = base?.stats.bandwidthKbps ?? 0;
   const bandwidthRatio = baseKbps > 0 ? baseKbps / Math.max(0.001, swarmKbps) : 0;
-  const bwBreak = centralizedKbps(robots, base?.foodSites.length ?? foodClusters, DEFAULT_PARAMS.msgHz);
+  const bwBreak = centralizedKbps(
+    robots,
+    base?.foodSites.length ?? foodClusters,
+    DEFAULT_PARAMS.msgHz,
+  );
 
   return (
     <div className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6">
@@ -134,10 +135,9 @@ export default function Compare() {
             Stigmergic vs Centralized
           </h1>
           <p className="mt-1 max-w-2xl text-[13px] text-slate-400">
-            Same seed, same food layout, same fleet size. Left: our pheromone
-            swarm coordinating through the environment. Right: a greedy
-            centralized planner with a shared food map. Watch bandwidth
-            diverge while yield stays comparable.
+            Same seed, same food layout, same fleet size. Left: our pheromone swarm coordinating
+            through the environment. Right: a greedy centralized planner with a shared food map.
+            Watch bandwidth diverge while yield stays comparable.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -176,22 +176,14 @@ export default function Compare() {
             first to {TARGET_DELIVERIES} deliveries
           </div>
           <div className="flex gap-3 font-mono text-xs">
-            <span className="text-cyan-300">
-              stig: {swarmTTF !== null ? `${swarmTTF}t` : "…"}
-            </span>
-            <span className="text-pink-300">
-              cent: {baseTTF !== null ? `${baseTTF}t` : "…"}
-            </span>
+            <span className="text-cyan-300">stig: {swarmTTF !== null ? `${swarmTTF}t` : "…"}</span>
+            <span className="text-pink-300">cent: {baseTTF !== null ? `${baseTTF}t` : "…"}</span>
           </div>
         </Panel>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Panel
-          title="Stigmergic swarm"
-          right={<Chip color="cyan">Φ pheromone</Chip>}
-          dense
-        >
+        <Panel title="Stigmergic swarm" right={<Chip color="cyan">Φ pheromone</Chip>} dense>
           <div className="relative overflow-hidden rounded-lg border border-white/[0.09] bg-ink-950">
             <canvas
               ref={swarmCanvasRef}
@@ -202,17 +194,8 @@ export default function Compare() {
             />
           </div>
           <div className="mt-2 grid grid-cols-3 gap-2">
-            <Stat
-              label="delivered"
-              value={swarm?.stats.collected ?? 0}
-              accent="cyan"
-            />
-            <Stat
-              label="uplink"
-              value={swarmKbps.toFixed(1)}
-              unit="kbps"
-              accent="emerald"
-            />
+            <Stat label="delivered" value={swarm?.stats.collected ?? 0} accent="cyan" />
+            <Stat label="uplink" value={swarmKbps.toFixed(1)} unit="kbps" accent="emerald" />
             <Stat
               label="energy"
               value={formatNum(swarm?.totalEnergy() ?? 0)}
@@ -221,11 +204,7 @@ export default function Compare() {
             />
           </div>
         </Panel>
-        <Panel
-          title="Centralized greedy"
-          right={<Chip color="amber">shared map</Chip>}
-          dense
-        >
+        <Panel title="Centralized greedy" right={<Chip color="amber">shared map</Chip>} dense>
           <div className="relative overflow-hidden rounded-lg border border-white/[0.09] bg-ink-950">
             <canvas
               ref={baseCanvasRef}
@@ -236,17 +215,8 @@ export default function Compare() {
             />
           </div>
           <div className="mt-2 grid grid-cols-3 gap-2">
-            <Stat
-              label="delivered"
-              value={base?.stats.collected ?? 0}
-              accent="cyan"
-            />
-            <Stat
-              label="uplink"
-              value={baseKbps.toFixed(1)}
-              unit="kbps"
-              accent="amber"
-            />
+            <Stat label="delivered" value={base?.stats.collected ?? 0} accent="cyan" />
+            <Stat label="uplink" value={baseKbps.toFixed(1)} unit="kbps" accent="amber" />
             <Stat
               label="energy"
               value={formatNum(base?.totalEnergy() ?? 0)}
@@ -327,40 +297,29 @@ export default function Compare() {
             accent="slate"
             hint="12 B × robots × msgHz"
           />
-          <Stat
-            label="total centralized"
-            value={baseKbps.toFixed(1)}
-            unit="kbps"
-            accent="amber"
-          />
+          <Stat label="total centralized" value={baseKbps.toFixed(1)} unit="kbps" accent="amber" />
           <Stat
             label="stigmergic savings"
-            value={
-              bandwidthRatio > 0 ? `${bandwidthRatio.toFixed(1)}×` : "—"
-            }
+            value={bandwidthRatio > 0 ? `${bandwidthRatio.toFixed(1)}×` : "—"}
             accent="emerald"
             hint="centralized ÷ stigmergic"
           />
         </div>
         <p className="mt-3 text-[12px] leading-relaxed text-slate-400">
-          The centralized model assumes a shared authoritative food map is
-          rebroadcast at <span className="text-white">1 Hz</span> plus per-agent
-          pose telemetry at the same {DEFAULT_PARAMS.msgHz}&nbsp;Hz cadence.
-          Stigmergic broadcast is a{" "}
-          <span className="text-white">5&nbsp;×&nbsp;5 field patch</span> at the
-          same rate, quantised and run-length collapsed.
+          The centralized model assumes a shared authoritative food map is rebroadcast at{" "}
+          <span className="text-white">1 Hz</span> plus per-agent pose telemetry at the same{" "}
+          {DEFAULT_PARAMS.msgHz}&nbsp;Hz cadence. Stigmergic broadcast is a{" "}
+          <span className="text-white">5&nbsp;×&nbsp;5 field patch</span> at the same rate,
+          quantised and run-length collapsed.
         </p>
       </Panel>
 
       <p className="mt-6 text-[11.5px] leading-relaxed text-slate-500">
-        Both simulators consume the same seed and food-cluster layout so the
-        arena is identical. The greedy planner is deliberately simple — no A*,
-        no re-planning — because the point of the comparison is the{" "}
+        Both simulators consume the same seed and food-cluster layout so the arena is identical. The
+        greedy planner is deliberately simple — no A*, no re-planning — because the point of the
+        comparison is the{" "}
         <span
-          className={cn(
-            "font-mono",
-            bandwidthRatio > 5 ? "text-emerald-300" : "text-slate-400",
-          )}
+          className={cn("font-mono", bandwidthRatio > 5 ? "text-emerald-300" : "text-slate-400")}
         >
           radio budget
         </span>

@@ -119,7 +119,8 @@ export function OnboardingTour({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
-      else if (e.key === "ArrowRight" || e.key === "Enter") setI((n) => Math.min(STEPS.length - 1, n + 1));
+      else if (e.key === "ArrowRight" || e.key === "Enter")
+        setI((n) => Math.min(STEPS.length - 1, n + 1));
       else if (e.key === "ArrowLeft") setI((n) => Math.max(0, n - 1));
     };
     window.addEventListener("keydown", onKey);
@@ -153,7 +154,12 @@ export function OnboardingTour({ onClose }: { onClose: () => void }) {
   })();
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label="Guided tour">
+    <div
+      className="pointer-events-none fixed inset-0 z-[100]"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Guided tour"
+    >
       {/* dim overlay with a spotlight cut-out on the target */}
       <div
         className="pointer-events-auto absolute inset-0 bg-black/60 backdrop-blur-[2px] transition-opacity"

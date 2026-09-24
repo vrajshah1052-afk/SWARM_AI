@@ -1,12 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Recording } from "../engine";
-import {
-  addRecording,
-  getRecordings,
-  newId,
-  removeRecording,
-  subscribe,
-} from "../store";
+import { addRecording, getRecordings, newId, removeRecording, subscribe } from "../store";
 
 function fakeRecording(id?: string): Recording {
   return {

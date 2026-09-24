@@ -6,7 +6,9 @@ interface Props {
   onError?: (error: Error, info: ErrorInfo) => void;
 }
 
-interface State { error: Error | null }
+interface State {
+  error: Error | null;
+}
 
 /**
  * Route-level crash containment. Wrapping each page in one of these means a
@@ -22,7 +24,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
   override componentDidCatch(error: Error, info: ErrorInfo): void {
     if (this.props.onError) this.props.onError(error, info);
-     
+
     console.error("ErrorBoundary caught:", error, info.componentStack);
   }
 

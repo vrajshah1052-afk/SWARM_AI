@@ -47,15 +47,15 @@ HTMLCanvasElement.prototype.toDataURL = vi.fn(() => "data:image/png;base64,00");
 // jsdom lacks requestAnimationFrame timing guarantees; the default polyfill is fine
 // but we cap it at one call so tests don't loop forever.
 let rafId = 0;
-window.requestAnimationFrame = ((cb: FrameRequestCallback) => {
+window.requestAnimationFrame = (cb: FrameRequestCallback) => {
   rafId++;
   const id = rafId;
   queueMicrotask(() => cb(performance.now()));
   return id;
-});
-window.cancelAnimationFrame = (() => {
+};
+window.cancelAnimationFrame = () => {
   /* no-op */
-});
+};
 
 // jsdom does not implement IntersectionObserver. Docs.tsx uses it for
 // scroll-spy — the fallback is fine, we just need the constructor to exist.
