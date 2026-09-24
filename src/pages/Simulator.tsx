@@ -449,7 +449,7 @@ export default function Simulator() {
                   </button>
                 ))}
               </div>
-              <div className="ml-auto flex items-center gap-2">
+              <div className="ml-auto flex items-center gap-2" data-tour="record">
                 <Btn variant={recording ? "danger" : "ghost"} onClick={toggleRecord}>
                   {recording ? `● REC ${recFrames}` : "● Record"}
                 </Btn>
@@ -458,7 +458,10 @@ export default function Simulator() {
               </div>
             </div>
 
-            <div className="relative overflow-hidden rounded-lg border border-white/[0.09] bg-ink-950">
+            <div
+              data-tour="sim-canvas"
+              className="relative overflow-hidden rounded-lg border border-white/[0.09] bg-ink-950"
+            >
               <canvas
                 ref={canvasRef}
                 role="img"
@@ -482,6 +485,7 @@ export default function Simulator() {
             </div>
 
             <div
+              data-tour="brush"
               className="mt-3 flex flex-wrap items-center gap-2"
               role="radiogroup"
               aria-label="Painting brush"

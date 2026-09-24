@@ -1,6 +1,7 @@
 import { NavLink, Link, useLocation } from "react-router-dom";
 import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "../utils/cn";
+import { OnboardingTour, shouldRunTour } from "./OnboardingTour";
 
 const NAV = [
   { to: "/", label: "Overview", icon: "◈" },
@@ -44,11 +45,19 @@ export function Logo({ compact = false }: { compact?: boolean }) {
 
 export default function Layout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const loc = useLocation();
   useEffect(() => {
     setOpen(false);
     window.scrollTo(0, 0);
   }, [loc.pathname]);
+  useEffect(() => {
+    // Defer to next tick so the first route paints before we spotlight.
+    const t = window.setTimeout(() => {
+      if (shouldRunTour()) setTourOpen(true);
+    }, 400);
+    return () => window.clearTimeout(t);
+  }, []);
 
   return (
     <div className="flex min-h-full flex-col bg-ink-950">
@@ -61,6 +70,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 key={n.to}
                 to={n.to}
                 end={n.to === "/"}
+                data-tour={n.to === "/compare" ? "nav-compare" : undefined}
                 className={({ isActive }) =>
                   cn(
                     "rounded-md px-3 py-1.5 text-[12px] font-medium transition",
@@ -117,6 +127,8 @@ export default function Layout({ children }: { children: ReactNode }) {
 
       <main className="flex-1">{children}</main>
 
+      {tourOpen && <OnboardingTour onClose={() => setTourOpen(false)} />}
+
       <footer className="border-t border-white/[0.07] bg-ink-900/60">
         <div className="mx-auto grid max-w-[1600px] gap-8 px-6 py-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
@@ -166,8 +178,17 @@ export default function Layout({ children }: { children: ReactNode }) {
             </div>
           </div>
         </div>
-        <div className="border-t border-white/[0.06] px-6 py-4 text-center font-mono text-[10px] tracking-wider text-slate-600">
-          © {new Date().getFullYear()} DIGITAL PHEROMONE LAB · SIMULATED DATA, NO ROBOTS WERE HARMED
+        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.06] px-6 py-4 font-mono text-[10px] tracking-wider text-slate-600">
+          <span>
+            © {new Date().getFullYear()} DIGITAL PHEROMONE LAB · SIMULATED DATA, NO ROBOTS WERE HARMED
+          </span>
+          <button
+            type="button"
+            onClick={() => setTourOpen(true)}
+            className="text-slate-500 uppercase transition hover:text-cyan-300"
+          >
+            ↻ replay tour
+          </button>
         </div>
       </footer>
     </div>
