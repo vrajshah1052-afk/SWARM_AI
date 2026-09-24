@@ -205,6 +205,8 @@ export class SwarmEngine {
   private tripSum = 0;
   private visitedCount = 0;
   private totalFood = 1;
+  /** Sum of Euclidean distance travelled by every robot — proxy for energy cost. */
+  private distanceSum = 0;
 
   constructor(params: Partial<Params> = {}, seed = 1337) {
     this.params = { ...DEFAULT_PARAMS, ...clampParams(params) };
@@ -233,6 +235,11 @@ export class SwarmEngine {
     this.reset();
   }
 
+  /** Total distance travelled by all robots — proxy for total energy expended. */
+  totalEnergy(): number {
+    return this.distanceSum;
+  }
+
   setParams(p: Partial<Params>) {
     const prevRobots = this.params.robots;
     this.params = { ...this.params, ...clampParams(p, this.params) };
@@ -248,6 +255,7 @@ export class SwarmEngine {
     this.visited.fill(0);
     this.visitedCount = 0;
     this.tripSum = 0;
+    this.distanceSum = 0;
     this.history = [];
     this.robots = [];
     this.stats = { ...this.stats, tick: 0, collected: 0, trips: 0, avgTrip: 0, coverage: 0, efficiency: 0 };
@@ -422,8 +430,11 @@ export class SwarmEngine {
           ny = r.y;
         }
       }
-      r.x = Math.min(GW - 2, Math.max(1, nx));
-      r.y = Math.min(GH - 2, Math.max(1, ny));
+      const clampedX = Math.min(GW - 2, Math.max(1, nx));
+      const clampedY = Math.min(GH - 2, Math.max(1, ny));
+      this.distanceSum += Math.hypot(clampedX - r.x, clampedY - r.y);
+      r.x = clampedX;
+      r.y = clampedY;
 
       const idx = (r.y | 0) * GW + (r.x | 0);
       if (!this.visited[idx]) {

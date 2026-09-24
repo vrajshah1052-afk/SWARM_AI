@@ -6,6 +6,7 @@ import Simulator from "../Simulator";
 import Dashboard from "../Dashboard";
 import Replay from "../Replay";
 import Docs from "../Docs";
+import Compare from "../Compare";
 
 function renderAt(path: string, node: React.ReactNode) {
   return render(<MemoryRouter initialEntries={[path]}>{node}</MemoryRouter>);
@@ -40,5 +41,12 @@ describe("page smoke tests", () => {
     renderAt("/docs", <Docs />);
     expect(screen.getByText(/Documentation/i)).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /Overview/i })).toBeInTheDocument();
+  });
+
+  it("Compare renders both engine panels", () => {
+    renderAt("/compare", <Compare />);
+    expect(screen.getByText(/Stigmergic vs Centralized/i)).toBeInTheDocument();
+    expect(screen.getByText(/Stigmergic swarm/i)).toBeInTheDocument();
+    expect(screen.getByText(/Centralized greedy/i)).toBeInTheDocument();
   });
 });

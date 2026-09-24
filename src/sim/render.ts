@@ -1,4 +1,5 @@
 import { GW, GH, RW, RH, type Frame, type SwarmEngine } from "./engine";
+import type { BaselineEngine } from "./baseline";
 
 export interface ViewOpts {
   showFood: boolean;
@@ -146,6 +147,90 @@ export function renderEngine(canvas: HTMLCanvasElement, engine: SwarmEngine, o: 
       ctx.rect(r.x * sx - size * 0.7, r.y * sy - size * 0.7, size * 1.4, size * 1.4);
     }
     ctx.fill();
+  }
+}
+
+/**
+ * Minimal renderer for the centralized/greedy BaselineEngine.
+ * Draws walls, food sites, nest, agent dots, and a subtle target line for
+ * carrying agents so the "planned path" nature of the algorithm is visible.
+ */
+export function renderBaseline(canvas: HTMLCanvasElement, engine: BaselineEngine): void {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const cw = canvas.clientWidth;
+  const ch = canvas.clientHeight;
+  if (canvas.width !== cw * dpr || canvas.height !== ch * dpr) {
+    canvas.width = cw * dpr;
+    canvas.height = ch * dpr;
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, cw, ch);
+  const sx = cw / GW;
+  const sy = ch / GH;
+
+  // wall tint
+  ctx.fillStyle = "rgba(26,31,45,0.85)";
+  for (let y = 1; y < GH - 1; y++) {
+    for (let x = 1; x < GW - 1; x++) {
+      if (engine.wall[y * GW + x] === 1) ctx.fillRect(x * sx, y * sy, sx + 0.5, sy + 0.5);
+    }
+  }
+
+  // food sites
+  for (const f of engine.foodSites) {
+    if (f.remaining <= 0) continue;
+    const alpha = Math.min(0.7, 0.15 + (f.remaining / (Math.PI * f.r * f.r * 6)) * 0.6);
+    ctx.fillStyle = `rgba(52,211,153,${alpha})`;
+    ctx.beginPath();
+    ctx.arc(f.x * sx, f.y * sy, f.r * sx, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // nest
+  const nx = engine.nest.x * sx;
+  const ny = engine.nest.y * sy;
+  const grad = ctx.createRadialGradient(nx, ny, 1, nx, ny, 26);
+  grad.addColorStop(0, "rgba(244,114,182,0.85)");
+  grad.addColorStop(1, "rgba(244,114,182,0)");
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(nx, ny, 26, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "rgba(251,207,232,0.9)";
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.arc(nx, ny, 6.5, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // planned path lines (very thin, low alpha)
+  ctx.strokeStyle = "rgba(244,114,182,0.16)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (const a of engine.agents) {
+    if (a.carrying) {
+      ctx.moveTo(a.x * sx, a.y * sy);
+      ctx.lineTo(nx, ny);
+    } else if (a.targetIdx >= 0) {
+      const f = engine.foodSites[a.targetIdx];
+      ctx.moveTo(a.x * sx, a.y * sy);
+      ctx.lineTo(f.x * sx, f.y * sy);
+    }
+  }
+  ctx.stroke();
+
+  // agents
+  const size = Math.max(1.3, sx * 0.85);
+  ctx.fillStyle = "rgba(236,242,255,0.92)";
+  for (const a of engine.agents) {
+    if (a.carrying) continue;
+    ctx.fillRect(a.x * sx - size / 2, a.y * sy - size / 2, size, size);
+  }
+  ctx.fillStyle = "rgba(134,255,190,0.98)";
+  for (const a of engine.agents) {
+    if (!a.carrying) continue;
+    ctx.fillRect(a.x * sx - size * 0.7, a.y * sy - size * 0.7, size * 1.4, size * 1.4);
   }
 }
 

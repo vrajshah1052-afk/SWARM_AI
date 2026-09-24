@@ -6,6 +6,7 @@ import Simulator from "./pages/Simulator";
 import Dashboard from "./pages/Dashboard";
 import Replay from "./pages/Replay";
 import Docs from "./pages/Docs";
+import Compare from "./pages/Compare";
 
 export default function App() {
   return (
@@ -41,6 +42,14 @@ export default function App() {
             element={
               <ErrorBoundary>
                 <Replay />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/compare"
+            element={
+              <ErrorBoundary>
+                <Compare />
               </ErrorBoundary>
             }
           />

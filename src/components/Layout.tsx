@@ -5,6 +5,7 @@ import { cn } from "../utils/cn";
 const NAV = [
   { to: "/", label: "Overview", icon: "◈" },
   { to: "/simulator", label: "Simulator", icon: "🎮" },
+  { to: "/compare", label: "Compare", icon: "⚖" },
   { to: "/dashboard", label: "Dashboard", icon: "📊" },
   { to: "/replay", label: "Replay", icon: "📹" },
   { to: "/docs", label: "Docs", icon: "📚" },
