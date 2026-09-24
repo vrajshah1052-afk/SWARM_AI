@@ -39,6 +39,7 @@ export default function Simulator() {
   const [preset, setPreset] = useState("balanced");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [muted, setMuted] = useState(true);
+  const [paramDrawerOpen, setParamDrawerOpen] = useState(false);
   const soundState = useRef({
     lastCollected: 0,
     lastCarrying: 0,
@@ -116,13 +117,13 @@ export default function Simulator() {
     };
   }, [engine]);
 
-  // painting
-  const paint = useCallback(
-    (e: React.MouseEvent<HTMLCanvasElement>) => {
-      if (brush === "none" || e.buttons !== 1) return;
-      const rect = e.currentTarget.getBoundingClientRect();
-      const gx = Math.round(((e.clientX - rect.left) / rect.width) * GW);
-      const gy = Math.round(((e.clientY - rect.top) / rect.height) * GH);
+  // painting — shared kernel for mouse and touch input.
+  const paintAt = useCallback(
+    (canvas: HTMLCanvasElement, clientX: number, clientY: number) => {
+      if (brush === "none") return;
+      const rect = canvas.getBoundingClientRect();
+      const gx = Math.round(((clientX - rect.left) / rect.width) * GW);
+      const gy = Math.round(((clientY - rect.top) / rect.height) * GH);
       const r = brush === "food" ? 5 : 4;
       for (let dy = -r; dy <= r; dy++) {
         for (let dx = -r; dx <= r; dx++) {
@@ -148,6 +149,26 @@ export default function Simulator() {
       }
     },
     [brush, engine],
+  );
+
+  const paint = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      if (e.buttons !== 1) return;
+      paintAt(e.currentTarget, e.clientX, e.clientY);
+    },
+    [paintAt],
+  );
+
+  const touchPaint = useCallback(
+    (e: React.TouchEvent<HTMLCanvasElement>) => {
+      if (brush === "none") return;
+      // Prevent the browser from turning the touch into a scroll/zoom.
+      e.preventDefault();
+      const t = e.touches[0];
+      if (!t) return;
+      paintAt(e.currentTarget, t.clientX, t.clientY);
+    },
+    [brush, paintAt],
   );
 
   const applyPreset = (key: string) => {
@@ -280,7 +301,28 @@ export default function Simulator() {
 
       <div className="grid gap-4 xl:grid-cols-[290px_minmax(0,1fr)_300px]">
         {/* ---------- LEFT: parameters ---------- */}
-        <div className="space-y-4">
+        {/* Hidden by default under xl. On small screens users tap the floating
+            "☰ Params" button to open it as a bottom sheet. */}
+        <div
+          className={cn(
+            "space-y-4",
+            "fixed inset-x-0 bottom-0 z-40 max-h-[75vh] overflow-y-auto border-t border-white/10 bg-ink-950/95 p-4 backdrop-blur-xl transition-transform duration-300 xl:static xl:z-auto xl:max-h-none xl:overflow-visible xl:border-0 xl:bg-transparent xl:p-0 xl:backdrop-blur-none xl:transition-none",
+            paramDrawerOpen ? "translate-y-0" : "translate-y-full xl:translate-y-0",
+          )}
+        >
+          <div className="mb-2 flex items-center justify-between xl:hidden">
+            <span className="font-mono text-[11px] tracking-[0.16em] text-slate-400 uppercase">
+              Parameters
+            </span>
+            <button
+              type="button"
+              onClick={() => setParamDrawerOpen(false)}
+              aria-label="Close parameters"
+              className="rounded-md border border-white/12 px-2 py-1 text-[11px] text-slate-300"
+            >
+              ✕
+            </button>
+          </div>
           <Panel title="Presets" dense>
             <div className="grid gap-1.5">
               {Object.entries(PRESETS).map(([k, p]) => (
@@ -467,9 +509,14 @@ export default function Simulator() {
                 role="img"
                 aria-label={`Live pheromone-field simulation. ${stats.collected} units delivered, ${stats.carrying} agents currently carrying, ${(stats.coverage * 100).toFixed(1)}% map coverage.`}
                 className={cn("block w-full", brush !== "none" ? "cursor-crosshair" : "cursor-default")}
-                style={{ aspectRatio: `${GW} / ${GH}` }}
+                style={{
+                  aspectRatio: `${GW} / ${GH}`,
+                  touchAction: brush === "none" ? "auto" : "none",
+                }}
                 onMouseDown={paint}
                 onMouseMove={paint}
+                onTouchStart={touchPaint}
+                onTouchMove={touchPaint}
               />
               <div className="pointer-events-none absolute top-2.5 left-2.5 flex flex-col gap-1.5">
                 <LegendPill color="#22d3ee" label="Φ_food · recruitment trail" />
@@ -627,6 +674,18 @@ export default function Simulator() {
           </Panel>
         </div>
       </div>
+
+      {/* Mobile-only floating drawer trigger. Hidden ≥ xl where the params
+          panel is a proper sidebar. */}
+      <button
+        type="button"
+        onClick={() => setParamDrawerOpen((o) => !o)}
+        aria-label={paramDrawerOpen ? "Close parameters" : "Open parameters"}
+        aria-expanded={paramDrawerOpen}
+        className="fixed right-4 bottom-4 z-50 flex items-center gap-2 rounded-full border border-cyan-400/40 bg-ink-950/95 px-4 py-2.5 text-[12px] font-semibold text-cyan-300 shadow-[0_0_24px_-6px_rgba(34,211,238,0.7)] backdrop-blur xl:hidden"
+      >
+        {paramDrawerOpen ? "✕ Close" : "☰ Params"}
+      </button>
     </div>
   );
 }
